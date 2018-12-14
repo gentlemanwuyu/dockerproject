@@ -1,0 +1,95 @@
+version: "2"
+services:
+  nginx:
+    image: patpat/nginx:latest
+    container_name: ${APP_NAME}-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./project:/var/www:rw
+      - ./nginx/nginx.conf:/usr/local/programs/nginx/conf/nginx.conf
+      - ./nginx/conf.d:/usr/local/programs/nginx/conf/conf.d
+      - ./nginx/logs:/usr/local/programs/nginx/logs/:rw
+      - ./nginx/logs/laravel:/var/log/laravel:rw
+      - ./nginx/ssl:/usr/local/programs/nginx/ssl:rw
+    links:
+      - php
+    networks:
+      - patpat-network
+  php:
+    image: patpat/php-fpm:latest
+    container_name: ${APP_NAME}-php
+    restart: unless-stopped
+    volumes:
+      - ./project:/var/www:rw
+      - ./php-fpm/php.ini:/usr/local/programs/php/etc/php.ini
+      - ./php-fpm/php-fpm.conf:/usr/local/programs/php/etc/php-fpm.conf
+      - ./php-fpm/php-fpm.d/www.conf:/usr/local/programs/php/etc/php-fpm.d/www.conf
+      - ./php-fpm/log:/usr/local/programs/php/var/log/:rw
+      - ./php-fpm/git_ssh/id_rsa:/root/.ssh/id_rsa:rw
+      - ./php-fpm/git_ssh/id_rsa.pub:/root/.ssh/id_rsa.pub:rw
+      - ./php-fpm/git_ssh/known_hosts:/root/.ssh/known_hosts:rw
+      - ./nginx/logs/laravel:/var/log/laravel:rw
+    links:
+      - mysql:${MYSQL_HOST}
+      - redis:${REDIS_HOST}
+    expose:
+      - "9000"
+    networks:
+      - patpat-network
+  redis:
+    image: patpat/redis:latest
+    container_name: ${APP_NAME}-redis
+    restart: unless-stopped
+    environment:
+      - "TZ: Asia/Shanghai"
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - ./redis/conf/redis.conf:/etc/redis/redis.conf
+      - ./redis/data:/data:rw
+    command: ["redis-server", "/etc/redis/redis.conf"]
+    ports:
+      - "6379:6379"
+    networks:
+      - patpat-network
+  mysql:
+    image: patpat/mysql:latest
+    container_name: ${APP_NAME}-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_HOST=${MYSQL_HOST}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql:rw
+      - ./mysql/conf:/etc/mysql/mysql.conf.d
+      - ./mysql/logs:/var/log/mysql:rw
+    networks:
+      - patpat-network
+  elasticsearch:
+    image: patpat/elasticsearch:latest
+    container_name: ${APP_NAME}-elasticsearch
+    restart: unless-stopped
+    environment:
+      - "TZ: Asia/Shanghai"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data:rw
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - patpat-network
+networks:
+  patpat-network:
+    driver: bridge
