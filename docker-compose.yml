@@ -1,7 +1,7 @@
 version: "2"
 services:
   nginx:
-    image: patpat/nginx:latest
+    image: gentlemanwuyu/nginx:latest
     container_name: ${APP_NAME}-nginx
     restart: unless-stopped
     ports:
@@ -17,9 +17,9 @@ services:
     links:
       - php
     networks:
-      - patpat-network
+      - gentlemanwuyu-network
   php:
-    image: patpat/php-fpm:latest
+    image: gentlemanwuyu/php-fpm:latest
     container_name: ${APP_NAME}-php
     restart: unless-stopped
     volumes:
@@ -38,9 +38,9 @@ services:
     expose:
       - "9000"
     networks:
-      - patpat-network
+      - gentlemanwuyu-network
   redis:
-    image: patpat/redis:latest
+    image: gentlemanwuyu/redis:latest
     container_name: ${APP_NAME}-redis
     restart: unless-stopped
     environment:
@@ -54,9 +54,9 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - patpat-network
+      - gentlemanwuyu-network
   mysql:
-    image: patpat/mysql:latest
+    image: gentlemanwuyu/mysql:latest
     container_name: ${APP_NAME}-mysql
     restart: unless-stopped
     environment:
@@ -69,9 +69,9 @@ services:
       - ./mysql/conf:/etc/mysql/mysql.conf.d
       - ./mysql/logs:/var/log/mysql:rw
     networks:
-      - patpat-network
+      - gentlemanwuyu-network
   elasticsearch:
-    image: patpat/elasticsearch:latest
+    image: gentlemanwuyu/elasticsearch:latest
     container_name: ${APP_NAME}-elasticsearch
     restart: unless-stopped
     environment:
@@ -89,7 +89,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     networks:
-      - patpat-network
+      - gentlemanwuyu-network
 networks:
-  patpat-network:
+  gentlemanwuyu-network:
     driver: bridge
