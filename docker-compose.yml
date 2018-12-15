@@ -8,7 +8,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./project:/var/www:rw
+      - ../projects:/var/www:rw
       - ./nginx/nginx.conf:/usr/local/programs/nginx/conf/nginx.conf
       - ./nginx/conf.d:/usr/local/programs/nginx/conf/conf.d
       - ./nginx/logs:/usr/local/programs/nginx/logs/:rw
@@ -23,7 +23,7 @@ services:
     container_name: ${APP_NAME}-php
     restart: unless-stopped
     volumes:
-      - ./project:/var/www:rw
+      - ../projects:/var/www:rw
       - ./php-fpm/php.ini:/usr/local/programs/php/etc/php.ini
       - ./php-fpm/php-fpm.conf:/usr/local/programs/php/etc/php-fpm.conf
       - ./php-fpm/php-fpm.d/www.conf:/usr/local/programs/php/etc/php-fpm.d/www.conf
